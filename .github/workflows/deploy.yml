@@ -1,0 +1,44 @@
+name: "Azure Infra & AI Deploy"
+
+# 1. Trigger: Kab chalni chahiye pipeline?
+on:
+  push:
+    branches:
+      - main  # Jab bhi aap main branch mein code push karenge
+
+jobs:
+  # JOB 1: Infrastructure Banana
+  terraform-setup:
+    name: "Run Terraform"
+    runs-on: ubuntu-latest # GitHub humein ek temporary Ubuntu machine dega ye chalane ke liye
+
+    steps:
+      # Code ko GitHub runner mein copy karna
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Terraform install karna
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      # Azure se connect karna (Jo secrets humne Step 2 mein dale the)
+      - name: Terraform Init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          cd terraform
+          terraform init
+
+      # Infrastructure create karna
+      - name: Terraform Apply
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          cd terraform
+          terraform apply -auto-approve

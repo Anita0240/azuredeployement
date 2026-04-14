@@ -1,0 +1,10 @@
+_pycache_/
+db.sqlite3
+.terraform/
+terraform/.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+.venv/
+venv/
+.env

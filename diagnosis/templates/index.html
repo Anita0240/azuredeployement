@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Doctor Agent</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; padding: 50px; }
+        .chat-box { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        #response { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+        <h2>👨‍⚕️ AI Health Assistant</h2>
+        <p>Aapko kya symptoms hain? (e.g., Fever, Cough)</p>
+        <input type="text" id="query" placeholder="Type symptoms here...">
+        <button onclick="askAI()">Ask</button>
+        <div id="response"></div>
+    </div>
+
+    <script>
+        async function askAI() {
+            const query = document.getElementById('query').value;
+            const resDiv = document.getElementById('response');
+            resDiv.style.display = 'block';
+            resDiv.innerText = 'Thinking...';
+
+            const response = await fetch('/api/ask/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+            const data = await response.json();
+            resDiv.innerText = data.ai_response || data.message;
+        }
+    </script>
+</body>
+</html>
