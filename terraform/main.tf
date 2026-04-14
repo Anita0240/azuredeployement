@@ -77,7 +77,7 @@ resource "azurerm_linux_virtual_machine" "ai_vm" {
   }
 }
 
-# (NIC definition yahan missing hai, but aapko nic resource bhi add karni hogi)
+
 resource "azurerm_network_interface" "nic" {
   name                = "ai-nic"
   location            = azurerm_resource_group.ai_rg.location
