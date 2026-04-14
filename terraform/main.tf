@@ -52,13 +52,15 @@ resource "azurerm_linux_virtual_machine" "ai_vm" {
   name                = "ai-server"
   resource_group_name = azurerm_resource_group.ai_rg.name
   location            = azurerm_resource_group.ai_rg.location
-  size                = "Standard_B1s" # Sasta aur chota VM (Testing ke liye best)
+  size                = "Standard_B1s"
   admin_username      = "azureuser"
   network_interface_ids = [azurerm_network_interface.nic.id]
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub") 
+    # Humne file ka naam 'my_azure_key.pub' kar diya hai
+    # '${path.module}' use karne se Terraform usi folder mein file dhoondega jahan main.tf hai
+    public_key = file("${path.module}/my_azure_key.pub") 
   }
 
   os_disk {
