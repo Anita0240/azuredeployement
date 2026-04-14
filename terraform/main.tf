@@ -20,7 +20,7 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-
+# 4. Public IP
 resource "azurerm_public_ip" "pip" {
   name                = "ai-vm-ip"
   location            = azurerm_resource_group.ai_rg.location
