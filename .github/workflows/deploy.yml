@@ -1,44 +1,54 @@
-name: "Azure Infra & AI Deploy"
+name: Deploy Django AI App (No Docker)
 
-# 1. Trigger: Kab chalni chahiye pipeline?
 on:
   push:
-    branches:
-      - main  # Jab bhi aap main branch mein code push karenge
+    branches: [ main ]
 
 jobs:
-  # JOB 1: Infrastructure Banana
-  terraform-setup:
-    name: "Run Terraform"
-    runs-on: ubuntu-latest # GitHub humein ek temporary Ubuntu machine dega ye chalane ke liye
-
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-      # Code ko GitHub runner mein copy karna
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Terraform install karna
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: azureuser
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 1. Python aur Virtual Environment install karna
+            sudo apt-get update
+            sudo apt-get install -y python3-pip python3-venv git
 
-      # Azure se connect karna (Jo secrets humne Step 2 mein dale the)
-      - name: Terraform Init
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: |
-          cd terraform
-          terraform init
+            # 2. Project folder setup
+            mkdir -p ~/my_ai_project
+            cd ~/my_ai_project
 
-      # Infrastructure create karna
-      - name: Terraform Apply
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: |
-          cd terraform
-          terraform apply -auto-approve
+            # 3. Code pull/clone
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/Anita0240/azuredeployement.git .
+            else
+              git pull origin main
+            fi
+
+            # 4. Virtual Environment banana aur activate karna
+            python3 -m venv venv
+            source venv/bin/activate
+
+            # 5. Requirements install karna
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install gunicorn
+
+            # 6. Django specific tasks (Migrations)
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+
+            # 7. Purane Gunicorn process ko kill karna (agar chal raha ho)
+            sudo pkill gunicorn || true
+
+            # 8. Gunicorn start karna (Background mein)
+            # Yahan 'my_project' ki jagah apne Django project ka naam likhein
+            nohup gunicorn --bind 0.0.0.0:8000 your_project_name.wsgi:application > gunicorn.log 2>&1 &

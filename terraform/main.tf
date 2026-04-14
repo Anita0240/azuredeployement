@@ -36,13 +36,13 @@ resource "azurerm_network_security_group" "nsg" {
   resource_group_name = azurerm_resource_group.ai_rg.name
 
   security_rule {
-    name                       = "SSH"
-    priority                   = 1001
+    name                       = "AllowDjango"
+    priority                   = 1002
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "22"
+    destination_port_range     = "8000" # Django port
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
