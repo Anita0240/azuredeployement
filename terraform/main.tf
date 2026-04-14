@@ -1,7 +1,7 @@
 # 1. Resource Group
 resource "azurerm_resource_group" "ai_rg" {
   name     = "ai-deployment-rg"
-  location = "Central India"
+  location = "centralindia"
 }
 
 # 2. Virtual Network
@@ -25,7 +25,8 @@ resource "azurerm_public_ip" "pip" {
   name                = "ai-vm-ip"
   location            = azurerm_resource_group.ai_rg.location
   resource_group_name = azurerm_resource_group.ai_rg.name
-  allocation_method   = "Static" # Static taaki IP baar baar change na ho
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 # 5. Network Security Group (Firewall)
